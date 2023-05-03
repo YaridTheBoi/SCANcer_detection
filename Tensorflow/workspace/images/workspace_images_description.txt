@@ -1,0 +1,5 @@
+There you should first store all your training data (photos that will teach your model what to detect). 
+Also here you should later store .xml files that you will get from your labeling.
+
+After you collect all your data and label it you have to divide those files into training(bigger) and testing(smaller) groups and put them in respective folders.
+!!!Remember to never separate pair of photo and .xml file (example: apple1.jpg and apple1.xml must be in same group)!!!

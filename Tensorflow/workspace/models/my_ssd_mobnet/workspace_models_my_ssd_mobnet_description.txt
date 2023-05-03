@@ -1,0 +1,6 @@
+Here you should have your altered pipeline.config file. 
+Original one should be in Tensorflow/workspace/pre-trained-models/ssd_mobilenet_v2_fpnlite_320x320_coco17_tpu-8 subfolder (if you use default model)
+
+After training checkpoints (trained model stage) will be stored and you should use it in your application
+
+Basically thats the folder where all your results of training are stored/

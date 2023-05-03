@@ -1,0 +1,3 @@
+Here your script will store label map and .record files. Label map will tell your model what labels it should use to describe detected objects.
+
+.record files store information used for training itself
