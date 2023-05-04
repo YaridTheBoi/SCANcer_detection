@@ -130,7 +130,6 @@ def analyze(filename):
     #     print("Plama nie jest podobna do koła.")
 
 
-
     # zaznaczenie znalezionych obszarow
     vis_utils.visualize_boxes_and_labels_on_image_array(
         img,
