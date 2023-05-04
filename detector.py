@@ -97,7 +97,7 @@ def analyze(filename):
     
     cut_img_grayscale = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)
     cut_img_grayscale = cv2.GaussianBlur(cut_img_grayscale, (3,3), 0) 
-    _, cut_img_binary = cv2.threshold(cut_img_grayscale,150,255,cv2.THRESH_BINARY)
+    _, cut_img_binary = cv2.threshold(cut_img_grayscale,150,255, 0)
     cv2.imshow("Binary", cut_img_binary)
 
 
@@ -107,10 +107,17 @@ def analyze(filename):
 
 
     # szukanie konturów i wybieranie największego
-    contours, _ = cv2.findContours(cut_img_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(cut_img_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)
-    largest_contour = contours[0]
+    print(len(contours))
 
+
+    #proba znalezienia konturu 
+    cut_copy = cut_img.copy()
+    img_contoures = cv2.drawContours(cut_copy, contours, -1, (255,0,255), 2)
+    #largest_contour = contours[0]
+    largest_contour = np.vstack(contours)
+    img_contoures = cv2.drawContours(img_contoures, largest_contour, -1, (0,255,0), 2)
     # aproksymacja konturu i obliczanie końcowych parametrów
     perimeter = cv2.arcLength(largest_contour, True)
     epsilon = 0.1 * perimeter
@@ -120,8 +127,20 @@ def analyze(filename):
     center, radius = cv2.minEnclosingCircle(largest_contour)
     circularity = 4 * np.pi * cv2.contourArea(largest_contour) / (perimeter * perimeter)
 
+    # rysowanie konturu plamy
+    
+    cv2.imshow("Contours", img_contoures)
+
     print('\nCIRCLE SIMILARITY%')
     print(circularity)
+
+
+    M = cv2.moments(largest_contour)
+
+    hu_moments = cv2.HuMoments(M)
+
+    print("\nSymmetry:", hu_moments[2])
+
 
     # # porównanie kształtu plamy z kształtem koła
     # if len(approx) == 1 and circularity >= 0.8:
