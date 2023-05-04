@@ -48,6 +48,8 @@ def analyze(filename):
 
 
     img = cv2.imread(cv2.samples.findFile(filename))
+    img_height = img.shape[0]
+    img_width = img.shape[1]
     if img is None:
         print("Could not read the image.")
         return
@@ -66,6 +68,37 @@ def analyze(filename):
     label_id_offset =1
 
 
+
+    # informacje z wykrycia
+    print("\nIMAGE SIZE:")
+    print("HEIGHT: "+ str(img_height))
+    print("WIDTH: "+ str(img_width))
+
+    print('\nBOXES:')
+    print(detections['detection_boxes'][0])
+
+    print('\nBOXES COORDINATES:')
+    y1 = int(detections['detection_boxes'][0][0] * img_height)
+    x1 = int(detections['detection_boxes'][0][1] * img_width)
+
+    y2 = int(detections['detection_boxes'][0][2] * img_height)
+    x2 = int(detections['detection_boxes'][0][3] * img_width)
+
+    print("x1: {}, y1:{}".format(x1,y1))
+    print("x2: {}, y2:{}".format(x2,y2))
+
+    print('\nSCORES:')
+    print(detections['detection_scores'])
+
+
+    cut_img = img[ y1:y2, x1:x2]
+    # wykryte zmiany odseparowane
+    cv2.imshow("Separated Changes", cut_img)
+    
+    cut_img_grayscale = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)
+    cut_img_edges = cv2.Canny(cut_img_grayscale, 125, 255)
+    cv2.imshow("Edges", cut_img_edges)
+
     # zaznaczenie znalezionych obszarow
     vis_utils.visualize_boxes_and_labels_on_image_array(
         img,
@@ -80,11 +113,10 @@ def analyze(filename):
     )
 
 
-
-
     #wykryte zmiany
-    cv2.imshow("Display window", img)
-    print(detections['detection_scores'])
+    cv2.imshow("Detection", img)
+    
+
 
     k = cv2.waitKey(0)
     if k == ord("s"):
