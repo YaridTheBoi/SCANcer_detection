@@ -91,13 +91,45 @@ def analyze(filename):
     print(detections['detection_scores'])
 
 
-    cut_img = img[ y1:y2, x1:x2]
+    cut_img = img[ y1:y2+10, x1-10:x2+10]
     # wykryte zmiany odseparowane
     cv2.imshow("Separated Changes", cut_img)
     
     cut_img_grayscale = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)
-    cut_img_edges = cv2.Canny(cut_img_grayscale, 125, 255)
+    cut_img_grayscale = cv2.GaussianBlur(cut_img_grayscale, (3,3), 0) 
+    _, cut_img_binary = cv2.threshold(cut_img_grayscale,150,255,cv2.THRESH_BINARY)
+    cv2.imshow("Binary", cut_img_binary)
+
+
+    cut_img_edges = cv2.Canny(cut_img_binary, 125, 255)
     cv2.imshow("Edges", cut_img_edges)
+
+
+
+    # szukanie konturów i wybieranie największego
+    contours, _ = cv2.findContours(cut_img_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted(contours, key=cv2.contourArea, reverse=True)
+    largest_contour = contours[0]
+
+    # aproksymacja konturu i obliczanie końcowych parametrów
+    perimeter = cv2.arcLength(largest_contour, True)
+    epsilon = 0.1 * perimeter
+    approx = cv2.approxPolyDP(largest_contour, epsilon, True)
+
+    # obliczenie współczynników koła dla porównania z kształtem plamy
+    center, radius = cv2.minEnclosingCircle(largest_contour)
+    circularity = 4 * np.pi * cv2.contourArea(largest_contour) / (perimeter * perimeter)
+
+    print('\nCIRCLE SIMILARITY%')
+    print(circularity)
+
+    # # porównanie kształtu plamy z kształtem koła
+    # if len(approx) == 1 and circularity >= 0.8:
+    #     print("Plama jest podobna do koła.")
+    # else:
+    #     print("Plama nie jest podobna do koła.")
+
+
 
     # zaznaczenie znalezionych obszarow
     vis_utils.visualize_boxes_and_labels_on_image_array(
