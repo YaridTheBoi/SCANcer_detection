@@ -11,6 +11,7 @@ CUSTOM_MODEL_NAME = 'my_ssd_mobnet'
 
 import cv2
 import numpy as np
+import random
 import sys
 import os
 from object_detection.utils import label_map_util
@@ -96,57 +97,47 @@ def analyze(filename):
     cv2.imshow("Separated Changes", cut_img)
     
     cut_img_grayscale = cv2.cvtColor(cut_img, cv2.COLOR_BGR2GRAY)
-    cut_img_grayscale = cv2.GaussianBlur(cut_img_grayscale, (3,3), 0) 
-    _, cut_img_binary = cv2.threshold(cut_img_grayscale,150,255, 0)
+
+    #obraz trzeba tak zmiekczac az znajde jeden kontur
+    
+    contours_amount = 100
+
+    while contours_amount!=1:
+        cut_img_grayscale = cv2.GaussianBlur(cut_img_grayscale, (5,5), 0) 
+        _, cut_img_binary = cv2.threshold(cut_img_grayscale,150,255, 0)
+
+        cut_img_edges = cv2.Canny(cut_img_binary, 125, 255)
+        contours, _ = cv2.findContours(cut_img_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours_amount = len(contours)
+
+
     cv2.imshow("Binary", cut_img_binary)
 
-
-    cut_img_edges = cv2.Canny(cut_img_binary, 125, 255)
     cv2.imshow("Edges", cut_img_edges)
 
+    img_contoures = cut_img.copy()
+    img_contoures = cv2.drawContours(img_contoures, contours, -1, (255,0,255), 2)
+    cv2.imshow("Contours", img_contoures)
 
-
-    # szukanie konturów i wybieranie największego
-    contours, _ = cv2.findContours(cut_img_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    contours = sorted(contours, key=cv2.contourArea, reverse=True)
-    print(len(contours))
-
-
-    #proba znalezienia konturu 
-    cut_copy = cut_img.copy()
-    img_contoures = cv2.drawContours(cut_copy, contours, -1, (255,0,255), 2)
-    #largest_contour = contours[0]
-    largest_contour = np.vstack(contours)
-    img_contoures = cv2.drawContours(img_contoures, largest_contour, -1, (0,255,0), 2)
     # aproksymacja konturu i obliczanie końcowych parametrów
-    perimeter = cv2.arcLength(largest_contour, True)
+    perimeter = cv2.arcLength(contours[0], True)
     epsilon = 0.1 * perimeter
-    approx = cv2.approxPolyDP(largest_contour, epsilon, True)
+    approx = cv2.approxPolyDP(contours[0], epsilon, True)
 
     # obliczenie współczynników koła dla porównania z kształtem plamy
-    center, radius = cv2.minEnclosingCircle(largest_contour)
-    circularity = 4 * np.pi * cv2.contourArea(largest_contour) / (perimeter * perimeter)
-
-    # rysowanie konturu plamy
-    
-    cv2.imshow("Contours", img_contoures)
+    center, radius = cv2.minEnclosingCircle(contours[0])
+    circularity = 4 * np.pi * cv2.contourArea(contours[0]) / (perimeter * perimeter)
 
     print('\nCIRCLE SIMILARITY%')
     print(circularity)
 
 
-    M = cv2.moments(largest_contour)
-
+    M = cv2.moments(contours[0])
     hu_moments = cv2.HuMoments(M)
-
     print("\nSymmetry:", hu_moments[2])
 
 
-    # # porównanie kształtu plamy z kształtem koła
-    # if len(approx) == 1 and circularity >= 0.8:
-    #     print("Plama jest podobna do koła.")
-    # else:
-    #     print("Plama nie jest podobna do koła.")
+
 
 
     # zaznaczenie znalezionych obszarow
