@@ -1,0 +1,26 @@
+<annotation>
+	<folder>benign</folder>
+	<filename>b1180.jpg</filename>
+	<path>/home/casper/SCANcer_detection/tensorflow_object_detection_easy_setup/Tensorflow/workspace/images/benign/b1180.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>224</width>
+		<height>224</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>Lagodna_Zmiana</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>96</xmin>
+			<ymin>87</ymin>
+			<xmax>129</xmax>
+			<ymax>127</ymax>
+		</bndbox>
+	</object>
+</annotation>

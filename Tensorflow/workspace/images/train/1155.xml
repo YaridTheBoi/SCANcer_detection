@@ -1,0 +1,26 @@
+<annotation>
+	<folder>malignant</folder>
+	<filename>1155.jpg</filename>
+	<path>/home/casper/SCANcer_detection/tensorflow_object_detection_easy_setup/Tensorflow/workspace/images/malignant/1155.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>224</width>
+		<height>224</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>Niepokojaca_Zmiana</name>
+		<pose>Unspecified</pose>
+		<truncated>1</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>2</xmin>
+			<ymin>6</ymin>
+			<xmax>224</xmax>
+			<ymax>221</ymax>
+		</bndbox>
+	</object>
+</annotation>

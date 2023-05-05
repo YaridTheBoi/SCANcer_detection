@@ -1,4 +1,8 @@
 item{
-	name:'Zmiana'
+	name:'Lagodna_Zmiana'
 	id:1
+}
+item{
+	name:'Niepokojaca_Zmiana'
+	id:2
 }
