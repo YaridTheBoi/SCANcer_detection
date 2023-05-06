@@ -12,7 +12,10 @@ CUSTOM_MODEL_NAME = 'my_ssd_mobnet'
 import cv2
 import numpy as np
 import sys
+from flask import Flask, request, send_file
+import tempfile
 import os
+import base64
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_utils
 from object_detection.builders import model_builder
@@ -41,13 +44,30 @@ def detect_fn(image):
     detections = detection_model.postprocess(prediction_dict, shapes)
     return detections
 
+app = Flask(__name__)
 
-def analyze(filename):
+@app.route('/', methods=['POST'])
+def analyze():
+
+    if 'image' not in request.files:
+        return "Brak przesłanego pliku", 400
+    
+    image_file = request.files['image']
+    
+    # Zapisanie pliku tymczasowego
+    temp_image = tempfile.NamedTemporaryFile(delete=False)
+    image_file.save(temp_image.name)
+
+    # Przetwarzanie obrazu przy użyciu OpenCV
+    img = cv2.imread(temp_image.name)
+
+
+
+
+
     # plik z etykietami 
     category_index = label_map_util.create_category_index_from_labelmap(ANNOTATIONS_PATH + '/label_map.pbtxt')
 
-
-    img = cv2.imread(cv2.samples.findFile(filename))
     img_height = img.shape[0]
     img_width = img.shape[1]
     if img is None:
@@ -67,7 +87,7 @@ def analyze(filename):
     detections['detection_classes'] = detections['detection_classes'].astype(np.int64)
     label_id_offset =1
 
-
+    print(detections['detection_scores'])
 
     # zaznaczenie znalezionych obszarow
     vis_utils.visualize_boxes_and_labels_on_image_array(
@@ -82,18 +102,35 @@ def analyze(filename):
         agnostic_mode=False
     )
 
+    # Usunięcie tymczasowego pliku
+    temp_image.close()
+    # Zapisanie przetworzonego obrazu do pliku tymczasowego
+    temp_result = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
+    cv2.imwrite(temp_result.name, img)
 
-    #wykryte zmiany
-    cv2.imshow("Detection", img)
+    _, buffer = cv2.imencode ('.jpg', img)
+    jpg_as_text = base64.b64encode(buffer)
+
+    resp = {
+        "image": str(jpg_as_text.decode('ascii')),
+        "chance": str(max(detections['detection_scores']) *100)[:5] +'%',
+        "label": str(category_index[(detections['detection_classes']+label_id_offset)[0]]["name"])
+
+    }
+
+
+    print(resp)
+
     
+    # Zwrócenie przetworzonego obrazu jako odpowiedź
+    #return send_file(temp_result.name, mimetype='image/jpeg')
+    return resp
 
 
-    k = cv2.waitKey(0)
-    if k == ord("s"):
-        cv2.imwrite("analyzed_"+filename, img)
-    elif k == ord("q"):
-        return
+def startServer(host):
+    app.run(debug=True, host= host)
 
 
 if __name__ == "__main__":
-    analyze(*sys.argv[1:])
+    startServer(*sys.argv[1:])
+    
